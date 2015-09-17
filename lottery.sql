@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50626
 File Encoding         : 65001
 
-Date: 2015-09-16 17:06:55
+Date: 2015-09-17 15:02:36
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -36,7 +36,7 @@ CREATE TABLE `doublelottery` (
   `periods` varchar(255) DEFAULT NULL,
   `lotterydate` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1853 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1856 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of doublelottery
@@ -1893,6 +1893,7 @@ INSERT INTO `doublelottery` VALUES ('1849', '5', '7', '15', '18', '26', '30', nu
 INSERT INTO `doublelottery` VALUES ('1850', '5', '10', '17', '25', '28', '29', null, null, null, '4', null, null, '2014117', '2014-10-09');
 INSERT INTO `doublelottery` VALUES ('1851', '9', '10', '14', '15', '19', '29', null, null, null, '16', null, null, '2014116', '2014-10-07');
 INSERT INTO `doublelottery` VALUES ('1852', '1', '9', '10', '11', '13', '32', null, null, null, '3', null, null, '2014115', '2014-10-05');
+INSERT INTO `doublelottery` VALUES ('1855', '2', '12', '19', '22', '24', '27', null, null, null, '15', null, null, '2015108', '2015-09-15');
 
 -- ----------------------------
 -- Table structure for `lottolottery`
@@ -1915,7 +1916,7 @@ CREATE TABLE `lottolottery` (
   `periods` varchar(255) DEFAULT NULL,
   `lotterydate` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2729 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2731 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of lottolottery
@@ -2796,3 +2797,4 @@ INSERT INTO `lottolottery` VALUES ('2725', '3', '6', '21', '24', '34', null, nul
 INSERT INTO `lottolottery` VALUES ('2726', '5', '14', '23', '27', '30', null, null, null, null, '2', '8', null, '10003', '2010-01-06');
 INSERT INTO `lottolottery` VALUES ('2727', '4', '23', '25', '26', '30', null, null, null, null, '7', '10', null, '10002', '2010-01-04');
 INSERT INTO `lottolottery` VALUES ('2728', '2', '6', '7', '12', '27', null, null, null, null, '2', '8', null, '10001', '2010-01-02');
+INSERT INTO `lottolottery` VALUES ('2730', '1', '13', '16', '26', '31', null, null, null, null, '7', '12', null, '15108', '2015-09-16');
