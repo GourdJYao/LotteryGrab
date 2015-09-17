@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import com.yaojian.main.dao.bean.Lottoball;
 import com.yaojian.main.dao.utils.DBUtil;
+import com.yaojian.main.log.LogUtils;
 
 public class LottoballDao {
 	public boolean insert(Lottoball lottoball) {
@@ -37,6 +38,7 @@ public class LottoballDao {
 				}
 			}
 		} catch (SQLException e) {
+			LogUtils.e("SQLException:", e);
 			e.printStackTrace();
 		} finally {
 			try {
@@ -48,6 +50,7 @@ public class LottoballDao {
 				}
 				util.closeConn(connetion);
 			} catch (Exception e) {
+				LogUtils.e("Exception:", e);
 				e.printStackTrace();
 			}
 		}

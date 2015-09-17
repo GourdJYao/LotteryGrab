@@ -2,8 +2,6 @@ package com.yaojian.main.dao.bean;
 
 import java.sql.Date;
 
-import com.yaojian.main.dao.utils.LotteryBall;
-
 public class Doubleball extends LotteryBall {
 
 	/**

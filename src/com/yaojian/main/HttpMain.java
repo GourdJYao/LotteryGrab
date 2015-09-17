@@ -13,6 +13,7 @@ import com.yaojian.main.dao.bean.Doubleball;
 import com.yaojian.main.dao.bean.Lottoball;
 import com.yaojian.main.http.HttpRequest;
 import com.yaojian.main.http.HttpUtils;
+import com.yaojian.main.log.LogUtils;
 
 public class HttpMain {
 
@@ -70,7 +71,30 @@ public class HttpMain {
 		}
 		redball.setPeriods(tempObject.getString("phase"));
 		redball.setLotterydate(new Date(tempObject.getLong("open") * 1000));
-		redballDao.insert(redball);
+		boolean isSuccess = redballDao.insert(redball);
+		if (isSuccess) {
+			LogUtils.i("lottoballDao insert success lottoball Date:"
+					+ redball.getLotterydate() + " Periods:"
+					+ redball.getPeriods() + ",redball_1:"
+					+ redball.getRedball_1() + ",redball_2:"
+					+ redball.getRedball_2() + ",redball_3:"
+					+ redball.getRedball_3() + ",redball_4:"
+					+ redball.getRedball_4() + ",redball_5:"
+					+ redball.getRedball_5() + ",redball_6"
+					+ redball.getRedball_6() + ",blueball_1"
+					+ redball.getBlueball_1());
+		} else {
+			LogUtils.i("lottoballDao insert fail lottoball Date:"
+					+ redball.getLotterydate() + " Periods:"
+					+ redball.getPeriods() + ",redball_1:"
+					+ redball.getRedball_1() + ",redball_2:"
+					+ redball.getRedball_2() + ",redball_3:"
+					+ redball.getRedball_3() + ",redball_4:"
+					+ redball.getRedball_4() + ",redball_5:"
+					+ redball.getRedball_5() + ",redball_6"
+					+ redball.getRedball_6() + ",blueball_1"
+					+ redball.getBlueball_1());
+		}
 	}
 
 	// 解析大乐透并插入
@@ -105,6 +129,29 @@ public class HttpMain {
 		}
 		lottoball.setPeriods(tempObject.getString("phase"));
 		lottoball.setLotterydate(new Date(tempObject.getLong("open") * 1000));
-		lottoballDao.insert(lottoball);
+		boolean isSuccess = lottoballDao.insert(lottoball);
+		if (isSuccess) {
+			LogUtils.i("lottoballDao insert success lottoball Date:"
+					+ lottoball.getLotterydate() + " Periods:"
+					+ lottoball.getPeriods() + ",redball_1:"
+					+ lottoball.getRedball_1() + ",redball_2:"
+					+ lottoball.getRedball_2() + ",redball_3:"
+					+ lottoball.getRedball_3() + ",redball_4:"
+					+ lottoball.getRedball_4() + ",redball_5:"
+					+ lottoball.getRedball_5() + ",blueball_1"
+					+ lottoball.getBlueball_1() + ",blueball_2"
+					+ lottoball.getBlueball_2());
+		} else {
+			LogUtils.i("lottoballDao insert fail lottoball Date:"
+					+ lottoball.getLotterydate() + " Periods:"
+					+ lottoball.getPeriods() + ",redball_1:"
+					+ lottoball.getRedball_1() + ",redball_2:"
+					+ lottoball.getRedball_2() + ",redball_3:"
+					+ lottoball.getRedball_3() + ",redball_4:"
+					+ lottoball.getRedball_4() + ",redball_5:"
+					+ lottoball.getRedball_5() + ",blueball_1"
+					+ lottoball.getBlueball_1() + ",blueball_2"
+					+ lottoball.getBlueball_2());
+		}
 	}
 }

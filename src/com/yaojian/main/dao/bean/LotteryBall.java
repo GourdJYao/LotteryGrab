@@ -1,4 +1,4 @@
-package com.yaojian.main.dao.utils;
+package com.yaojian.main.dao.bean;
 
 import java.io.Serializable;
 import java.sql.Date;
