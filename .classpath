@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="libs/json-lib-2.2.3-jdk15.jar"/>
 	<classpathentry kind="lib" path="libs/json.jar"/>
 	<classpathentry kind="lib" path="libs/mysql-connector-java-5.0.3-bin.jar"/>
+	<classpathentry kind="lib" path="libs/htmlparser1_6.jar"/>
+	<classpathentry kind="lib" path="libs/log4j.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
