@@ -1,41 +1,238 @@
 package com.yaojian.main;
 
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import net.sf.json.JSONObject;
 
 import org.json.JSONArray;
 
 import com.yaojian.main.dao.DoubleballDao;
+import com.yaojian.main.dao.LaoHuangLiDao;
 import com.yaojian.main.dao.LottoballDao;
 import com.yaojian.main.dao.bean.Doubleball;
+import com.yaojian.main.dao.bean.LaoHuangLi;
 import com.yaojian.main.dao.bean.Lottoball;
 import com.yaojian.main.http.HttpRequest;
 import com.yaojian.main.http.HttpUtils;
 import com.yaojian.main.log.LogUtils;
+import com.yaojian.main.utils.DateUtils;
 
 public class HttpMain {
 
+	private static Timer caipiaoTimer;
+
+	private static CaipiaoTask caipiaoTask;
+
+	private static final String LAOHUANGLI_URL = "http://apis.haoservice.com/lifeservice/laohuangli/d?date=%s&key=db14ddd8deb94c239cc796afa4011006";
+	private static final String LAOHUANGLI_URL_YEARS = "http://nongli.911cha.com/%s.html";
+
+	// private static final String LAOHUANGLI_URL_YEARS =
+	// "http://v.juhe.cn/laohuangli/d?date=%s&key=7eaa94bcecc9db9b98b80f5a801cb366";
+
 	public static void main(String[] args) {
-		String s = HttpRequest.executeRequest();
-		String temp = HttpUtils.decodeUnicode(s);
-		temp = temp.replaceAll("Hao.caiPiaoInit\\(", "");
-		temp = temp.substring(0, temp.length() - 5);
-		System.out.println(temp);
-		JSONObject jsonObject = JSONObject.fromObject(temp);
-		JSONObject caipiaoObject = jsonObject.getJSONObject("caipiao");
-		if (caipiaoObject != null) {
-			Set<String> keySet = caipiaoObject.keySet();
-			for (String key : keySet) {
-				JSONObject tempObject = caipiaoObject.getJSONObject(key);
-				String lotteryName = tempObject.getString("name");
-				if (lotteryName.equals("双色球")) {
-					insertDoubleBall(tempObject);
-				} else if (lotteryName.equals("大乐透")) {
-					insertLottoBall(tempObject);
+		// startCaipiaoTask();
+		// startLaohuangli();
+		startLaohuangli1();
+	}
+
+	private static void startLaohuangli1() {
+		String dateString = "1915-1-1";
+		// String dateURl = String.format(LAOHUANGLI_URL_YEARS, dateString);
+		String dateURl = String.format(LAOHUANGLI_URL_YEARS, dateString);
+		List<String> huangliList = HttpRequest
+				.executeHtmlPPagerRequest(dateURl);
+		if (huangliList != null && huangliList.size() > 0) {
+			LaoHuangLi laoHuangLi = new LaoHuangLi();
+			int i = 0;
+			while (i < huangliList.size()) {
+				String value = huangliList.get(i);
+				if (laoHuangLi.getWuxing() == null
+						|| laoHuangLi.getWuxing().split(",").length <= 3) {
+					if (value.equals("年五行")) {
+						laoHuangLi.setWuxing(huangliList.get(++i));
+					}
+					if (value.equals("月五行")) {
+						laoHuangLi.setWuxing(laoHuangLi.getWuxing() + ","
+								+ huangliList.get(++i));
+					}
+					if (value.equals("日五行")) {
+						laoHuangLi.setWuxing(laoHuangLi.getWuxing() + ","
+								+ huangliList.get(++i));
+					}
+					if (value.equals("时五行")) {
+						laoHuangLi.setWuxing(laoHuangLi.getWuxing() + ","
+								+ huangliList.get(++i));
+						System.out.println("" + laoHuangLi.getWuxing());
+					}
+				}
+
+				if (value.equals("公历")) {
+					String gongliDateString = huangliList.get((i = i + 1));
+					while (!gongliDateString.startsWith("公元")) {
+						gongliDateString = huangliList.get((i = i + 1));
+					}
+					String[] gongliDateArray = gongliDateString.split(" ");
+					gongliDateArray[0] = gongliDateArray[0]
+							.replaceAll("公元", "");
+					gongliDateArray[0] = gongliDateArray[0]
+							.replaceAll("年", "-").replaceAll("月", "-")
+							.replaceAll("日", "");
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-M-d");
+					try {
+						laoHuangLi.setYangli(new java.sql.Date(format.parse(
+								gongliDateArray[0]).getTime()));
+						laoHuangLi.setYinli(gongliDateArray[1]);
+						System.out.println("" + laoHuangLi.getYangli());
+						System.out.println("" + laoHuangLi.getYinli());
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				++i;
+			}
+		}
+
+	}
+
+	private static void startLaohuangli() {
+		try {
+			LaoHuangLiDao laoHuangLiDao = new LaoHuangLiDao();
+			String dateString = laoHuangLiDao.getLastLaoHuangLi();
+			while (DateUtils.compareNowDate(dateString)) {
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+				java.util.Date date = format.parse(dateString);
+				String dateURl = String.format(LAOHUANGLI_URL, dateString);
+				String s = HttpRequest.executeRequest(dateURl);
+				System.out.println("s:" + s);
+				JSONObject jsonObject = JSONObject.fromObject(s);
+				if (jsonObject != null
+						&& jsonObject.getString("error_code") != null
+						&& jsonObject.getString("error_code").equals("0")) {
+					JSONObject resultJSONObject = jsonObject
+							.getJSONObject("result");
+					if (resultJSONObject != null) {
+						LaoHuangLi laoHuangLi = new LaoHuangLi();
+						if (resultJSONObject.getString("yangli") != null) {
+							laoHuangLi.setYangli(new Date(format.parse(
+									resultJSONObject.getString("yangli"))
+									.getTime()));
+						}
+						if (resultJSONObject.getString("yinli") != null) {
+							laoHuangLi.setYinli(resultJSONObject
+									.getString("yinli"));
+						}
+						if (resultJSONObject.getString("wuxing") != null) {
+							laoHuangLi.setWuxing(resultJSONObject
+									.getString("wuxing"));
+						}
+						if (resultJSONObject.getString("chongsha") != null) {
+							laoHuangLi.setChongsha(resultJSONObject
+									.getString("chongsha"));
+						}
+						if (resultJSONObject.getString("baiji") != null) {
+							laoHuangLi.setBaiji(resultJSONObject
+									.getString("baiji"));
+						}
+						if (resultJSONObject.getString("jishen") != null) {
+							laoHuangLi.setJishen(resultJSONObject
+									.getString("jishen"));
+						}
+						if (resultJSONObject.getString("yi") != null) {
+							laoHuangLi.setYi(resultJSONObject.getString("yi"));
+						}
+						if (resultJSONObject.getString("xiongshen") != null) {
+							laoHuangLi.setXiongshen(resultJSONObject
+									.getString("xiongshen"));
+						}
+						if (resultJSONObject.getString("ji") != null) {
+							laoHuangLi.setJi(resultJSONObject.getString("ji"));
+						}
+						boolean isSuccess = laoHuangLiDao
+								.insertLaoHuangLi(laoHuangLi);
+						if (isSuccess) {
+							LogUtils.i("insert Laohuangli success,date:"
+									+ dateString);
+							System.out
+									.println("insert Laohuangli success,date:"
+											+ dateString);
+						} else {
+							LogUtils.i("insert Laohuangli fail,date:"
+									+ dateString);
+							System.out.println("insert Laohuangli fail,date:"
+									+ dateString);
+						}
+					}
+				} else {
+					LogUtils.i("error http JSON String,s:" + s);
+					System.out.println("error http JSON String,s:" + s);
+				}
+				dateString = format.format(new java.util.Date(
+						(date.getTime() + 24 * 60 * 60 * 1000)));
+			}
+		} catch (ParseException e) {
+			LogUtils.e("Error Date ParseException", e);
+			e.printStackTrace();
+		}
+	}
+
+	private static void startCaipiaoTask() {
+
+		if (caipiaoTimer == null) {
+			caipiaoTimer = new Timer();
+		}
+
+		if (caipiaoTask == null) {
+			caipiaoTask = new CaipiaoTask();
+		}
+		caipiaoTimer.schedule(caipiaoTask, 0, 24 * 60 * 60 * 1000);
+
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		cannelCaipiaoTask();
+		super.finalize();
+	}
+
+	private static void cannelCaipiaoTask() {
+		if (caipiaoTask != null) {
+			caipiaoTask.cancel();
+		}
+		if (caipiaoTimer != null) {
+			caipiaoTimer.cancel();
+		}
+	}
+
+	static class CaipiaoTask extends TimerTask {
+		@Override
+		public void run() {
+			String s = HttpRequest.executeRequest();
+			String temp = HttpUtils.decodeUnicode(s);
+			temp = temp.replaceAll("Hao.caiPiaoInit\\(", "");
+			temp = temp.substring(0, temp.length() - 5);
+			System.out.println(temp);
+			JSONObject jsonObject = JSONObject.fromObject(temp);
+			JSONObject caipiaoObject = jsonObject.getJSONObject("caipiao");
+			if (caipiaoObject != null) {
+				Set<String> keySet = caipiaoObject.keySet();
+				for (String key : keySet) {
+					JSONObject tempObject = caipiaoObject.getJSONObject(key);
+					String lotteryName = tempObject.getString("name");
+					if (lotteryName.equals("双色球")) {
+						insertDoubleBall(tempObject);
+					} else if (lotteryName.equals("大乐透")) {
+						insertLottoBall(tempObject);
+					}
 				}
 			}
+
 		}
 	}
 

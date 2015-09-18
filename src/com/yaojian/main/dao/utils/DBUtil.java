@@ -5,15 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-/**
- * 
- * @author gourdjyao 数据库工具类
- */
 public class DBUtil {
 
-	/*
-	 * 关闭数据库连接
-	 */
 	public void closeConn(Connection conn) {
 		try {
 			conn.close();
@@ -22,9 +15,6 @@ public class DBUtil {
 		}
 	}
 
-	/*
-	 * 打开数据库连接
-	 */
 	public Connection openConnection() {
 		Properties prop = new Properties();
 		String driver = null;
