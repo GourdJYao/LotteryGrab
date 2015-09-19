@@ -21,7 +21,7 @@ public class LaoHuangLiDao {
 			preparedStatement = connetion.prepareStatement(sql);
 			resulte = preparedStatement.executeQuery();
 			if (resulte == null || !resulte.next()) {
-				return "2003-01-01";
+				return "1915-01-01";
 			} else {
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 				return format.format(resulte.getDate(1));
@@ -43,7 +43,7 @@ public class LaoHuangLiDao {
 				e.printStackTrace();
 			}
 		}
-		return "2003-12-01";
+		return "1915-01-01";
 	}
 
 	public boolean insertLaoHuangLi(LaoHuangLi laoHuangLi) {

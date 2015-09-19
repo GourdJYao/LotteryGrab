@@ -36,186 +36,275 @@ public class HttpMain {
 	// "http://v.juhe.cn/laohuangli/d?date=%s&key=7eaa94bcecc9db9b98b80f5a801cb366";
 
 	public static void main(String[] args) {
-		 startCaipiaoTask();
+		startCaipiaoTask();
 		// startLaohuangli();
 		startLaohuangli1();
 	}
 
 	private static void startLaohuangli1() {
-		try {
-			LaoHuangLiDao laoHuangLiDao = new LaoHuangLiDao();
-			String dateString = laoHuangLiDao.getLastLaoHuangLi();
-			while (DateUtils.compareNowDate(dateString)) {
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-M-d");
-				java.util.Date date = format.parse(dateString);
-				String dateURl = String.format(LAOHUANGLI_URL_YEARS, format.format(date));
-				System.out.println(dateURl);
-				List<String> huangliList = HttpRequest
-						.executeHtmlPPagerRequest(dateURl);
-				if (huangliList != null && huangliList.size() > 0) {
-					LaoHuangLi laoHuangLi = new LaoHuangLi();
-					int i = 0;
-					while (i < huangliList.size()) {
-						String value = huangliList.get(i);
-						if (laoHuangLi.getWuxing() == null
-								|| laoHuangLi.getWuxing().split(",").length <= 3) {
-							if (value.equals("年五行")) {
-								laoHuangLi.setWuxing(huangliList.get(++i));
-							}
-							if (value.equals("月五行")) {
-								laoHuangLi.setWuxing(laoHuangLi.getWuxing() + ","
-										+ huangliList.get(++i));
-							}
-							if (value.equals("日五行")) {
-								laoHuangLi.setWuxing(laoHuangLi.getWuxing() + ","
-										+ huangliList.get(++i));
-							}
-							if (value.equals("时五行")) {
-								laoHuangLi.setWuxing(laoHuangLi.getWuxing() + ","
-										+ huangliList.get(++i));
-								System.out.println("" + laoHuangLi.getWuxing());
-							}
-						}
+		new Thread() {
+			public void run() {
+				try {
+					LaoHuangLiDao laoHuangLiDao = new LaoHuangLiDao();
+					String dateString = laoHuangLiDao.getLastLaoHuangLi();
+					while (DateUtils.compareNowDate(dateString)) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								"yyyy-M-d");
+						java.util.Date date = format.parse(dateString);
+						String dateURl = String.format(LAOHUANGLI_URL_YEARS,
+								format.format(date));
+						System.out.println(dateURl);
+						List<String> huangliList = HttpRequest
+								.executeHtmlPPagerRequest(dateURl);
+						LaoHuangLi laoHuangLi = null;
+						if (huangliList != null && huangliList.size() > 0) {
+							laoHuangLi = new LaoHuangLi();
+							int i = 0;
+							while (i < huangliList.size()) {
+								String value = huangliList.get(i);
+								if (laoHuangLi.getWuxing() == null
+										|| laoHuangLi.getWuxing().split(",").length <= 3) {
+									if (value.equals("年五行")) {
+										laoHuangLi.setWuxing(huangliList
+												.get(++i));
+									}
+									if (value.equals("月五行")) {
+										laoHuangLi.setWuxing(laoHuangLi
+												.getWuxing()
+												+ ","
+												+ huangliList.get(++i));
+									}
+									if (value.equals("日五行")) {
+										laoHuangLi.setWuxing(laoHuangLi
+												.getWuxing()
+												+ ","
+												+ huangliList.get(++i));
+									}
+									if (value.equals("时五行")) {
+										laoHuangLi.setWuxing(laoHuangLi
+												.getWuxing()
+												+ ","
+												+ huangliList.get(++i));
+										System.out.println(""
+												+ laoHuangLi.getWuxing());
+									}
+								}
 
-						if (value.equals("公历")) {
-							String gongliDateString = huangliList.get((i = i + 1));
-							while (!gongliDateString.startsWith("公元")) {
-								gongliDateString = huangliList.get((i = i + 1));
-							}
-							String[] gongliDateArray = gongliDateString.split(" ");
-							gongliDateArray[0] = gongliDateArray[0]
-									.replaceAll("公元", "");
-							gongliDateArray[0] = gongliDateArray[0]
-									.replaceAll("年", "-").replaceAll("月", "-")
-									.replaceAll("日", "");
-							try {
-								laoHuangLi.setYangli(new java.sql.Date(format.parse(
-										gongliDateArray[0]).getTime()));
-								laoHuangLi.setYinli(gongliDateArray[1]);
-								System.out.println("" + laoHuangLi.getYangli());
-							} catch (ParseException e) {
-								e.printStackTrace();
-							}
-						}
-						
-						if(value.equals("农历")){
-							String nongli= huangliList.get((i = i + 1));
-							while(!nongli.startsWith("一")){
-								nongli= huangliList.get((i = i + 1));
-							}
-							nongli+=huangliList.get((i = i + 1));
-							nongli+=huangliList.get((i = i + 1));
-							if(huangliList.get((i = i + 1)).equals("干支")){
-								nongli+=","+huangliList.get((i = i + 1));
-							}
-							laoHuangLi.setYinli(nongli+","+laoHuangLi.getYinli());
-						}
-						if(value.equals("生肖")&&!laoHuangLi.getYinli().contains("属")){
-							String shuxiang= huangliList.get((i = i + 1));
-							while(!shuxiang.startsWith("属")){
-								shuxiang= huangliList.get((i = i + 1));
-							}
-							laoHuangLi.setYinli(laoHuangLi.getYinli()+","+shuxiang);
-						}
-						
-						if(value.equals("星座")){
-							String xingzuo= huangliList.get((i = i + 1));
-							while(!xingzuo.contains("座")){
-								xingzuo= huangliList.get((i = i + 1));
-							}
-							laoHuangLi.setYinli(laoHuangLi.getYinli()+","+xingzuo);
-							System.out.println("" + laoHuangLi.getYinli());
-						}
-						if(value.equals("冲煞")&&laoHuangLi.getChongsha()==null){
-							String chongsha= huangliList.get((i = i + 1));
-							while(!chongsha.contains("冲")){
-								chongsha= huangliList.get((i = i + 1));
-							}
-							laoHuangLi.setChongsha(chongsha);
-							System.out.println("" + laoHuangLi.getChongsha());
-						}
-						if(value.equals("【宜】")){
-							String yi = "";
-							String tempyi=huangliList.get((i = i + 1));
-							while(!tempyi.contains("【忌】")){
-								if(tempyi.contains("黄历")){
-									tempyi=huangliList.get((i = i + 1));
-									continue;
+								if (value.equals("公历")) {
+									String gongliDateString = huangliList
+											.get((i = i + 1));
+									while (!gongliDateString.startsWith("公元")) {
+										gongliDateString = huangliList
+												.get((i = i + 1));
+									}
+									String[] gongliDateArray = gongliDateString
+											.split(" ");
+									gongliDateArray[0] = gongliDateArray[0]
+											.replaceAll("公元", "");
+									gongliDateArray[0] = gongliDateArray[0]
+											.replaceAll("年", "-")
+											.replaceAll("月", "-")
+											.replaceAll("日", "");
+									try {
+										laoHuangLi
+												.setYangli(new java.sql.Date(
+														format.parse(
+																gongliDateArray[0])
+																.getTime()));
+										laoHuangLi.setYinli(gongliDateArray[1]);
+										System.out.println(""
+												+ laoHuangLi.getYangli());
+									} catch (ParseException e) {
+										e.printStackTrace();
+									}
 								}
-								if(tempyi.length()>2){
-									tempyi=huangliList.get((i = i + 1));
-									continue;
+
+								if (value.equals("农历")) {
+									if (laoHuangLi.getYinli().length() == 3) {
+										String nongli = huangliList
+												.get((i = i + 1));
+										while (nongli.contains("黄历")
+												|| nongli.contains("吉日")) {
+											nongli = huangliList
+													.get((i = i + 1));
+										}
+										nongli += huangliList.get((i = i + 1));
+										nongli += huangliList.get((i = i + 1));
+										if (huangliList.get((i = i + 1))
+												.equals("干支")) {
+											String ganzhi = huangliList
+													.get((i = i + 1));
+											while (ganzhi.contains("黄历")
+													|| ganzhi.contains("吉日")) {
+												ganzhi = huangliList
+														.get((i = i + 1));
+											}
+											nongli += "," + ganzhi;
+										}
+										laoHuangLi.setYinli(nongli + ","
+												+ laoHuangLi.getYinli());
+									}
 								}
-								if(yi.length()==0){
-									yi +=tempyi;
-								}else{
-									yi +=","+tempyi;	
+								if (value.equals("生肖")
+										&& !laoHuangLi.getYinli().contains("属")) {
+									String shuxiang = huangliList
+											.get((i = i + 1));
+									while (!shuxiang.startsWith("属")) {
+										shuxiang = huangliList.get((i = i + 1));
+									}
+									laoHuangLi.setYinli(laoHuangLi.getYinli()
+											+ "," + shuxiang);
 								}
-								tempyi=huangliList.get((i = i + 1));
-							}
-							--i;
-							laoHuangLi.setYi(yi);
-							System.out.println("" + laoHuangLi.getYi());
-						}
-						if(value.equals("【忌】")){
-							String ji = "";
-							String tempji=huangliList.get((i = i + 1));
-							while(!tempji.contains("吉神宜趋")){
-								if(tempji.contains("黄历")){
-									tempji=huangliList.get((i = i + 1));
-									continue;
+
+								if (value.equals("星座")) {
+									String xingzuo = huangliList
+											.get((i = i + 1));
+									while (!xingzuo.contains("座")) {
+										xingzuo = huangliList.get((i = i + 1));
+									}
+									laoHuangLi.setYinli(laoHuangLi.getYinli()
+											+ "," + xingzuo);
+									System.out.println(""
+											+ laoHuangLi.getYinli());
 								}
-								if(tempji.length()>2){
-									tempji=huangliList.get((i = i + 1));
-									continue;
+								if (value.equals("冲煞")
+										&& laoHuangLi.getChongsha() == null) {
+									String chongsha = huangliList
+											.get((i = i + 1));
+									while (!chongsha.contains("冲")) {
+										chongsha = huangliList.get((i = i + 1));
+									}
+									laoHuangLi.setChongsha(chongsha);
+									System.out.println(""
+											+ laoHuangLi.getChongsha());
 								}
-								if(ji.length()==0){
-									ji +=tempji;
-								}else{
-									ji +=","+tempji;	
+								if (value.equals("【宜】")) {
+									String yi = "";
+									String tempyi = huangliList
+											.get((i = i + 1));
+									while (!tempyi.contains("【忌】")) {
+										if (tempyi.contains("黄历")) {
+											tempyi = huangliList
+													.get((i = i + 1));
+											continue;
+										}
+										if (tempyi.length() > 2
+												&& (tempyi.contains("黄历") || tempyi
+														.contains("吉日"))) {
+											tempyi = huangliList
+													.get((i = i + 1));
+											continue;
+										}
+										if (yi.length() == 0) {
+											yi += tempyi;
+										} else {
+											yi += "," + tempyi;
+										}
+										tempyi = huangliList.get((i = i + 1));
+									}
+									--i;
+									laoHuangLi.setYi(yi);
+									System.out.println("" + laoHuangLi.getYi());
 								}
-								tempji=huangliList.get((i = i + 1));
+								if (value.equals("【忌】")) {
+									String ji = "";
+									String tempji = huangliList
+											.get((i = i + 1));
+									while (!tempji.contains("吉神宜趋")) {
+										if (tempji.contains("黄历")) {
+											tempji = huangliList
+													.get((i = i + 1));
+											continue;
+										}
+										if (tempji.length() > 2
+												&& (tempji.contains("黄历") || tempji
+														.contains("吉日"))) {
+											tempji = huangliList
+													.get((i = i + 1));
+											continue;
+										}
+										if (ji.length() == 0) {
+											ji += tempji;
+										} else {
+											ji += "," + tempji;
+										}
+										tempji = huangliList.get((i = i + 1));
+									}
+									--i;
+									laoHuangLi.setJi(ji);
+									System.out.println("" + laoHuangLi.getJi());
+								}
+
+								if (value.equals("吉神宜趋")) {
+									String jishen = huangliList
+											.get((i = i + 1));
+									while (jishen.contains("黄历")
+											|| jishen.contains("吉日")) {
+										jishen = huangliList.get((i = i + 1));
+									}
+									laoHuangLi.setJishen(jishen);
+									System.out.println(""
+											+ laoHuangLi.getJishen());
+								}
+								if (value.equals("凶神宜忌")) {
+									String xiongshen = huangliList
+											.get((i = i + 1));
+									while (xiongshen.contains("黄历")
+											|| xiongshen.contains("吉日")) {
+										xiongshen = huangliList
+												.get((i = i + 1));
+									}
+									laoHuangLi.setXiongshen(xiongshen);
+									;
+									System.out.println(""
+											+ laoHuangLi.getXiongshen());
+								}
+
+								if (value.equals("彭祖百忌")) {
+									String baiji = huangliList.get((i = i + 1));
+									while (baiji.contains("黄历")
+											|| baiji.contains("吉日")
+											|| baiji.contains("acronym")) {
+										baiji = huangliList.get((i = i + 1));
+									}
+									laoHuangLi.setBaiji(baiji);
+									System.out.println(""
+											+ laoHuangLi.getBaiji());
+								}
+								++i;
 							}
-							--i;
-							laoHuangLi.setJi(ji);
-							System.out.println("" + laoHuangLi.getJi());
 						}
-						
-						if(value.equals("吉神宜趋")){
-							String jishen=huangliList.get((i = i + 1));
-							while(jishen.contains("黄历")||jishen.contains("吉日")){
-								jishen=huangliList.get((i = i + 1));
+						if (laoHuangLi != null) {
+							boolean isSuccess = laoHuangLiDao
+									.insertLaoHuangLi(laoHuangLi);
+							if (isSuccess) {
+								LogUtils.i("insert Laohuangli success,date:"
+										+ dateString);
+								System.out
+										.println("insert Laohuangli success,date:"
+												+ dateString);
+							} else {
+								LogUtils.i("insert Laohuangli fail,date:"
+										+ dateString);
+								System.out
+										.println("insert Laohuangli fail,date:"
+												+ dateString);
 							}
-							laoHuangLi.setJishen(jishen);
-							System.out.println("" + laoHuangLi.getJishen());
 						}
-						if(value.equals("凶神宜忌")){
-							String xiongshen=huangliList.get((i = i + 1));
-							while(xiongshen.contains("黄历")||xiongshen.contains("吉日")){
-								xiongshen=huangliList.get((i = i + 1));
-							}
-							laoHuangLi.setXiongshen(xiongshen);;
-							System.out.println("" + laoHuangLi.getXiongshen());
+						dateString = format.format(new java.util.Date((date
+								.getTime() + 24 * 60 * 60 * 1000)));
+						try {
+							sleep(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-						
-						if(value.equals("彭祖百忌")){
-							String baiji=huangliList.get((i = i + 1));
-							while(baiji.contains("黄历")||baiji.contains("吉日")||baiji.contains("acronym")){
-								baiji=huangliList.get((i = i + 1));
-							}
-							laoHuangLi.setBaiji(baiji);
-							System.out.println("" + laoHuangLi.getBaiji());
-						}
-						++i;
 					}
+				} catch (ParseException e) {
+					LogUtils.e("Error Date ParseException", e);
+					e.printStackTrace();
 				}
-				dateString = format.format(new java.util.Date(
-						(date.getTime() + 24 * 60 * 60 * 1000)));
 			}
-		} catch (ParseException e) {
-			LogUtils.e("Error Date ParseException", e);
-			e.printStackTrace();
-		}
+		}.start();
 	}
 
 	private static void startLaohuangli() {
