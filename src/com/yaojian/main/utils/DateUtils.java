@@ -11,10 +11,12 @@ public class DateUtils {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Date nowDate = new Date();
 		String nowDateString = format.format(nowDate);
+//		double offset=1576800000000d;
 		try {
 			Date date = format.parse(dateString);
 			nowDate = format.parse(nowDateString);
-			if (date.getTime() < nowDate.getTime()) {
+//			double nowtime=nowDate.getTime()+offset;
+			if (date.getTime() < (nowDate.getTime())) {
 				return true;
 			} else {
 				return false;

@@ -239,7 +239,8 @@ public class HttpMain {
 									String jishen = huangliList
 											.get((i = i + 1));
 									while (jishen.contains("黄历")
-											|| jishen.contains("吉日")) {
+											|| jishen.contains("吉日")
+											|| jishen.length() == 2) {
 										jishen = huangliList.get((i = i + 1));
 									}
 									laoHuangLi.setJishen(jishen);
@@ -255,7 +256,6 @@ public class HttpMain {
 												.get((i = i + 1));
 									}
 									laoHuangLi.setXiongshen(xiongshen);
-									;
 									System.out.println(""
 											+ laoHuangLi.getXiongshen());
 								}
