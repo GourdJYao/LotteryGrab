@@ -82,7 +82,6 @@ public class HttpRequest {
 					|| !isContainsChinese(node.getText().trim())) {
 				return;
 			}
-			System.out.println("childNode.getName:" + node.getText());
 			huangli.add(node.getText().trim());
 			return;
 		} else {

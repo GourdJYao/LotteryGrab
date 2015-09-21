@@ -43,6 +43,7 @@ public class HttpMain {
 
 	private static void startLaohuangli1() {
 		new Thread() {
+			@Override
 			public void run() {
 				try {
 					LaoHuangLiDao laoHuangLiDao = new LaoHuangLiDao();
@@ -239,13 +240,16 @@ public class HttpMain {
 									String jishen = huangliList
 											.get((i = i + 1));
 									while (jishen.contains("黄历")
-											|| jishen.contains("吉日")
-											|| jishen.length() == 2) {
+											|| jishen.contains("吉日")) {
 										jishen = huangliList.get((i = i + 1));
 									}
-									laoHuangLi.setJishen(jishen);
-									System.out.println(""
-											+ laoHuangLi.getJishen());
+									if (jishen.equals("凶神宜忌")) {
+										i--;
+									} else {
+										laoHuangLi.setJishen(jishen);
+										System.out.println(""
+												+ laoHuangLi.getJishen());
+									}
 								}
 								if (value.equals("凶神宜忌")) {
 									String xiongshen = huangliList
@@ -255,9 +259,13 @@ public class HttpMain {
 										xiongshen = huangliList
 												.get((i = i + 1));
 									}
-									laoHuangLi.setXiongshen(xiongshen);
-									System.out.println(""
-											+ laoHuangLi.getXiongshen());
+									if (xiongshen.equals("节日")) {
+										i--;
+									} else {
+										laoHuangLi.setXiongshen(xiongshen);
+										System.out.println(""
+												+ laoHuangLi.getXiongshen());
+									}
 								}
 
 								if (value.equals("彭祖百忌")) {
@@ -294,7 +302,7 @@ public class HttpMain {
 						dateString = format.format(new java.util.Date((date
 								.getTime() + 24 * 60 * 60 * 1000)));
 						try {
-							sleep(1000);
+							sleep(500);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
