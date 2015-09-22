@@ -299,8 +299,10 @@ public class HttpMain {
 												+ dateString);
 							}
 						}
-						dateString = format.format(new java.util.Date((date
-								.getTime() + 24 * 60 * 60 * 1000)));
+						// long dateTime = (date.getTime() + (24 * 60 * 60 *
+						// 1000l));
+						date.setDate((date.getDate() + 1));
+						dateString = format.format(date);
 						try {
 							sleep(500);
 						} catch (InterruptedException e) {
@@ -387,8 +389,8 @@ public class HttpMain {
 					LogUtils.i("error http JSON String,s:" + s);
 					System.out.println("error http JSON String,s:" + s);
 				}
-				dateString = format.format(new java.util.Date(
-						(date.getTime() + 24 * 60 * 60 * 1000)));
+				date.setDate(date.getDate() + 1);
+				dateString = format.format(date);
 			}
 		} catch (ParseException e) {
 			LogUtils.e("Error Date ParseException", e);
