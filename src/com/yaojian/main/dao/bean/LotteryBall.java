@@ -20,6 +20,7 @@ public class LotteryBall implements Serializable {
 	protected Integer blueball_3;
 	protected String periods;
 	protected Date lotterydate;
+	protected LaoHuangLi laohuangli;
 
 	public Integer getId() {
 		return id;
@@ -139,6 +140,14 @@ public class LotteryBall implements Serializable {
 
 	public void setLotterydate(Date lotterydate) {
 		this.lotterydate = lotterydate;
+	}
+
+	public LaoHuangLi getLaohuangli() {
+		return laohuangli;
+	}
+
+	public void setLaohuangli(LaoHuangLi laohuangli) {
+		this.laohuangli = laohuangli;
 	}
 
 }

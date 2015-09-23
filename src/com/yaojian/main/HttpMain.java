@@ -57,6 +57,9 @@ public class HttpMain {
 						System.out.println(dateURl);
 						List<String> huangliList = HttpRequest
 								.executeHtmlPPagerRequest(dateURl);
+						if (huangliList == null || huangliList.size() == 0) {
+							break;
+						}
 						LaoHuangLi laoHuangLi = null;
 						if (huangliList != null && huangliList.size() > 0) {
 							laoHuangLi = new LaoHuangLi();
