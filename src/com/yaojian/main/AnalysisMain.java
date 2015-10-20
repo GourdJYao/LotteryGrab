@@ -26,12 +26,20 @@ public class AnalysisMain {
 		case Calendar.SATURDAY:
 			System.out.println("=================今天是大乐透开奖推荐==================");
 			getLottoBallZouShi();
+			System.out.println("=================通过整串宜查询==================");
+			getLottoBallZouShiYiAll();
+			System.out.println("=================通过历史期数查询==================");
+			getLottoBallZouShiByQi();
 			break;
 		case Calendar.TUESDAY:
 		case Calendar.THURSDAY:
 		case Calendar.SUNDAY:
 			System.out.println("=================今天是双色球开奖推荐==================");
 			getDoubleBallZoushi();
+			System.out.println("=================通过整串宜查询==================");
+			getDoubleBallZoushiByLaohuangli();
+			System.out.println("=================通过历史期数查询==================");
+			getDoubleBallZoushiByqi();
 			break;
 		}
 	}
@@ -76,6 +84,74 @@ public class AnalysisMain {
 
 	}
 
+	private static void getDoubleBallZoushiByLaohuangli() {
+		LaoHuangLiDao laoHuangLiDao = new LaoHuangLiDao();
+		LaoHuangLi laoHuangLi = laoHuangLiDao.getTodayLaohuangli();
+		Map<String, LotteryBall> lotteryBallMap = new HashMap<String, LotteryBall>();
+		if (laoHuangLi != null) {
+			if (laoHuangLi.getYi() != null) {
+				DoubleballDao doubleballDao = new DoubleballDao();
+				String yiString = laoHuangLi.getYi();
+				List<Doubleball> doubleballList = doubleballDao
+						.getDoubleballListByYiAll(yiString);
+				for (Doubleball doubleball : doubleballList) {
+					lotteryBallMap.put(doubleball.getPeriods(), doubleball);
+				}
+				initDoubleBallNumber();
+				for (String key : lotteryBallMap.keySet()) {
+					Doubleball doubleball = (Doubleball) lotteryBallMap
+							.get(key);
+					getDoubleBallNumber(doubleball);
+				}
+				for (int i = 0; i < ballNumberList.size(); i++) {
+					if (i < 33) {
+						System.out.println((i + 1) + ":"
+								+ ballNumberList.get(i));
+					} else {
+						System.out.println((i - 32) + ":"
+								+ ballNumberList.get(i));
+					}
+				}
+			} else {
+				System.out.println("今天没有相关[宜]事项！");
+			}
+		} else {
+			System.out.println("未查询到今天的老黄历");
+		}
+
+	}
+
+	private static void getDoubleBallZoushiByqi() {
+		Map<String, LotteryBall> lotteryBallMap = new HashMap<String, LotteryBall>();
+		DoubleballDao doubleballDao = new DoubleballDao();
+		Integer qiTemp = doubleballDao.getDoubleballPeriods();
+		if (qiTemp == -1) {
+			System.out.println("================没有查询到相应期数==================");
+		} else {
+			qiTemp++;
+			String temp = qiTemp + "";
+			temp = temp.substring(temp.length() - 3, temp.length());
+			System.out.println("================开奖期数==================" + temp);
+			List<Doubleball> doubleballList = doubleballDao
+					.getDoubleballListByQi(temp);
+			for (Doubleball doubleball : doubleballList) {
+				lotteryBallMap.put(doubleball.getPeriods(), doubleball);
+			}
+			initDoubleBallNumber();
+			for (String key : lotteryBallMap.keySet()) {
+				Doubleball doubleball = (Doubleball) lotteryBallMap.get(key);
+				getDoubleBallNumber(doubleball);
+			}
+			for (int i = 0; i < ballNumberList.size(); i++) {
+				if (i < 33) {
+					System.out.println((i + 1) + ":" + ballNumberList.get(i));
+				} else {
+					System.out.println((i - 32) + ":" + ballNumberList.get(i));
+				}
+			}
+		}
+	}
+
 	private static void getLottoBallZouShi() {
 		LaoHuangLiDao laoHuangLiDao = new LaoHuangLiDao();
 		LaoHuangLi laoHuangLi = laoHuangLiDao.getTodayLaohuangli();
@@ -111,6 +187,71 @@ public class AnalysisMain {
 			}
 		} else {
 			System.out.println("未查询到今天的老黄历");
+		}
+	}
+
+	private static void getLottoBallZouShiYiAll() {
+		LaoHuangLiDao laoHuangLiDao = new LaoHuangLiDao();
+		LaoHuangLi laoHuangLi = laoHuangLiDao.getTodayLaohuangli();
+		Map<String, LotteryBall> lotteryBallMap = new HashMap<String, LotteryBall>();
+		if (laoHuangLi != null) {
+			if (laoHuangLi.getYi() != null) {
+				LottoballDao lottoballDao = new LottoballDao();
+				String yiString = laoHuangLi.getYi();
+				List<Lottoball> lottoballList = lottoballDao
+						.getLottoballListByYiAll(yiString);
+				for (Lottoball lottoball : lottoballList) {
+					lotteryBallMap.put(lottoball.getPeriods(), lottoball);
+				}
+				initLottoBallNumber();
+				for (String key : lotteryBallMap.keySet()) {
+					Lottoball lottoball = (Lottoball) lotteryBallMap.get(key);
+					getLottoBallNumber(lottoball);
+				}
+				for (int i = 0; i < ballNumberList.size(); i++) {
+					if (i < 35) {
+						System.out.println((i + 1) + ":"
+								+ ballNumberList.get(i));
+					} else {
+						System.out.println((i - 34) + ":"
+								+ ballNumberList.get(i));
+					}
+				}
+			} else {
+				System.out.println("今天没有相关[宜]事项！");
+			}
+		} else {
+			System.out.println("未查询到今天的老黄历");
+		}
+	}
+
+	private static void getLottoBallZouShiByQi() {
+		Map<String, LotteryBall> lotteryBallMap = new HashMap<String, LotteryBall>();
+		LottoballDao lottoballDao = new LottoballDao();
+		Integer qiTemp = lottoballDao.getLottoballPeriods();
+		if (qiTemp == -1) {
+			System.out.println("================没有查询到相应期数==================");
+		} else {
+			qiTemp++;
+			String temp = qiTemp + "";
+			temp = temp.substring(temp.length() - 3, temp.length());
+			List<Lottoball> lottoballList = lottoballDao
+					.getLottoballListByQi(temp);
+			for (Lottoball lottoball : lottoballList) {
+				lotteryBallMap.put(lottoball.getPeriods(), lottoball);
+			}
+			initLottoBallNumber();
+			for (String key : lotteryBallMap.keySet()) {
+				Lottoball lottoball = (Lottoball) lotteryBallMap.get(key);
+				getLottoBallNumber(lottoball);
+			}
+			for (int i = 0; i < ballNumberList.size(); i++) {
+				if (i < 35) {
+					System.out.println((i + 1) + ":" + ballNumberList.get(i));
+				} else {
+					System.out.println((i - 34) + ":" + ballNumberList.get(i));
+				}
+			}
 		}
 	}
 
